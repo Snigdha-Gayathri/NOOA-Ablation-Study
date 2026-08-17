@@ -329,7 +329,7 @@ This repository contains the complete NOOA experimental artifact:
 * generated results
 * study visualizations
 
-The notebook serves as the primary executable research artifact, while `results/` and `images/` contain the corresponding outputs and visual evidence.
+The notebook: https://colab.research.google.com/drive/1KqGLMmwD5mw_9O8Hs-6cWUTt9oFFV4Sm#scrollTo=95342217 serves as the primary executable research artifact, while `results/` and `images/` contain the corresponding outputs and visual evidence.
 
 ---
 
