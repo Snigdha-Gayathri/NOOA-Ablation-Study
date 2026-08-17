@@ -4,39 +4,86 @@
 
 **NOOA** is an experimental study investigating how individual **agent-harness components** affect the reliability, efficiency, and execution behavior of tool-using AI agents.
 
-Modern agent systems often combine mechanisms such as typed interfaces, validation, retries, persistent state, dynamic context, structured logging, termination controls, and multi-agent contracts. When these components are introduced simultaneously, it becomes difficult to determine which mechanisms actually contribute to better agent behavior.
+The study was developed as part of a broader exploration of **AI systems, agent engineering, and performance-oriented systems design**, including work targeted toward **NVIDIA's Deep Learning Performance Architect** domain.
 
-This study addresses that problem through **controlled ablation experiments**, isolating the contribution of individual harness capabilities while keeping the experimental environment consistent.
+The central motivation is straightforward:
 
----
+> **When an agent system becomes more sophisticated, which components actually make it better?**
 
-## Research Question
-
-> **Which components of an agent harness actually improve agent performance, reliability, and execution behavior, and what costs do they introduce?**
-
-The study evaluates this through controlled configurations and analyzes not only aggregate performance, but also the underlying failure behavior of each configuration.
+Instead of evaluating a complex agent as a single black box, NOOA uses controlled ablations to isolate the contribution of individual architectural mechanisms.
 
 ---
 
-## What Is Being Studied?
+## Motivation
 
-The ablation study investigates the contribution of the following agent-harness mechanisms:
+Modern agent systems increasingly combine:
 
-| Component                    | Role                                                     |
-| ---------------------------- | -------------------------------------------------------- |
-| **CodeAct**                  | Enables executable actions through generated code        |
-| **Typed I/O**                | Enforces structured interfaces between components        |
-| **Validation + Retry**       | Detects invalid outputs and attempts controlled recovery |
-| **Pass-by-Reference**        | Reduces unnecessary data movement and duplication        |
-| **Persistent State**         | Preserves information across execution steps             |
-| **Structured Event Logging** | Provides machine-readable execution traces               |
-| **Static Context**           | Provides fixed contextual information                    |
-| **Dynamic Context**          | Allows context to evolve during execution                |
-| **Validated Termination**    | Prevents premature or invalid task termination           |
-| **Multi-Agent Contracts**    | Enforces structured communication between agents         |
-| **Failure Recovery**         | Enables controlled recovery from execution errors        |
+* tool execution
+* structured interfaces
+* validation and retries
+* persistent state
+* dynamic context
+* memory
+* multi-agent orchestration
+* failure recovery
+* structured observability
+* execution optimization
 
-The configurations progressively introduce these mechanisms to measure their individual and combined effects.
+Adding these mechanisms can improve an agent, but it can also introduce additional latency, complexity, serialization overhead, and new failure modes.
+
+This creates a systems-level question:
+
+> **Which mechanisms provide measurable value, and what is the performance or reliability cost of introducing them?**
+
+This question is particularly relevant to the design of efficient AI systems and aligns with the broader systems-performance perspective explored in NVIDIA-oriented deep learning and inference engineering work.
+
+NOOA therefore treats the agent harness itself as an experimental system whose components can be independently measured.
+
+---
+
+## Research Questions
+
+### RQ1. Reliability
+
+Which agent-harness components reduce execution failures and improve successful task completion?
+
+### RQ2. Efficiency
+
+Which components improve execution efficiency, and which introduce measurable overhead?
+
+### RQ3. Architectural Contribution
+
+Do individual mechanisms provide measurable independent benefits, or do improvements primarily emerge from interactions between components?
+
+### RQ4. Failure Behavior
+
+How does each harness configuration change the type and frequency of failures observed during execution?
+
+### RQ5. Systems Trade-offs
+
+When a component improves reliability, what execution or architectural cost does it introduce?
+
+---
+
+## Ablated Components
+
+The study evaluates the contribution of multiple agent-harness mechanisms:
+
+| Component                    | Function                                                |
+| ---------------------------- | ------------------------------------------------------- |
+| **CodeAct**                  | Enables executable actions through generated code       |
+| **Typed I/O**                | Enforces structured interfaces between components       |
+| **Validation + Retry**       | Detects invalid outputs and enables controlled recovery |
+| **Pass-by-Reference**        | Reduces unnecessary data movement and duplication       |
+| **Persistent State**         | Preserves information across execution steps            |
+| **Structured Event Logging** | Provides machine-readable execution traces              |
+| **Static Context**           | Provides fixed contextual information                   |
+| **Dynamic Context**          | Allows context to evolve during execution               |
+| **Validated Termination**    | Prevents premature or invalid task termination          |
+| **Multi-Agent Contracts**    | Enforces structured communication between agents        |
+| **Failure Recovery**         | Enables controlled recovery from execution errors       |
+
+These mechanisms are introduced across controlled configurations to determine which components materially affect system behavior.
 
 ---
 
@@ -44,20 +91,22 @@ The configurations progressively introduce these mechanisms to measure their ind
 
 The study evaluates four primary configurations, **A through D**, representing progressively capable agent-harness designs.
 
-| Configuration | Purpose                                                         |
+| Configuration | Experimental Role                                               |
 | ------------- | --------------------------------------------------------------- |
-| **A**         | Establishes baseline behavior with minimal harness capabilities |
+| **A**         | Minimal baseline used to establish reference behavior           |
 | **B**         | Introduces core reliability and structured-execution mechanisms |
 | **C**         | Adds state, context, and execution-oriented mechanisms          |
 | **D**         | Evaluates the complete harness configuration                    |
 
-The experimental notebook contains the exact configuration definitions and execution logic.
+The exact configuration definitions, implementation, and execution logic are contained in the research notebook.
 
 ---
 
 ## Evaluation Methodology
 
-The study evaluates each configuration across multiple dimensions rather than reducing agent behavior to a single score.
+NOOA does not rely on a single aggregate score.
+
+The evaluation considers multiple dimensions of agent behavior.
 
 ### Reliability
 
@@ -70,32 +119,30 @@ The study evaluates each configuration across multiple dimensions rather than re
 
 * Execution overhead
 * Data movement
-* Additional orchestration cost
-* Effect of state and context mechanisms
+* Orchestration cost
+* State and context overhead
 
-### Behavioral Analysis
+### Failure Behavior
 
-Each unsuccessful execution is analyzed according to its underlying failure mode.
-
-This makes it possible to distinguish between:
+Failed executions are classified according to their underlying failure mechanism, including:
 
 * invalid outputs
 * tool execution failures
 * validation failures
-* state-related failures
-* context-related failures
+* state failures
+* context failures
 * contract violations
 * termination failures
 * recovery failures
 * serialization and data-transfer overhead
 
-This failure-level analysis is important because two configurations can achieve similar aggregate results while exhibiting very different failure patterns.
+This allows the study to distinguish between systems that simply achieve a similar success rate and systems that **fail in fundamentally different ways**.
 
 ---
 
 ## Statistical Analysis
 
-The study uses controlled, paired comparisons to evaluate differences between configurations under comparable experimental conditions.
+The study uses controlled comparisons between configurations to determine whether observed differences represent meaningful changes in system behavior.
 
 The analysis includes:
 
@@ -103,25 +150,55 @@ The analysis includes:
 * significance testing
 * effect-size analysis
 * failure-rate comparisons
-* interpretation of practical significance
+* practical interpretation of observed differences
 
-Statistical results are considered alongside observed behavioral differences rather than treating statistical significance alone as evidence of architectural superiority.
+Statistical significance is considered alongside effect magnitude and behavioral evidence rather than being treated as sufficient evidence of architectural superiority.
+
+---
+
+## Systems and Performance Perspective
+
+A major motivation for this work is to approach agent engineering from a **systems-performance perspective**.
+
+My broader work in this area includes an **LLM Inference Optimization Lab** and a **PyTorch-based Deep Learning Performance Profiler**, developed while exploring the engineering concerns relevant to high-performance deep learning systems and NVIDIA's **Deep Learning Performance Architect** role.
+
+That work focused on questions such as:
+
+* Where does inference time actually go?
+* How does batch size affect throughput?
+* What is the memory cost of different precisions?
+* How does quantization change performance?
+* Where does GPU utilization fall short?
+* Which bottlenecks are architectural rather than model-level?
+
+NOOA applies the same underlying mindset to **agent systems**:
+
+> **Do not assume a component is useful because it sounds architecturally sophisticated. Measure its effect.**
+
+The study therefore treats agent orchestration, state, context, validation, communication, and recovery mechanisms as measurable systems components rather than abstract architectural features.
 
 ---
 
 ## Reproducibility
 
-The complete experiment is contained in the accompanying Jupyter notebook.
+The complete experimental implementation is contained in the accompanying Jupyter notebook.
 
-### Run the Experiment
-
-Open:
+### Primary Research Artifact
 
 `nooa_ablation_study.ipynb`
 
-The notebook contains the experimental implementation, configuration definitions, execution procedure, metric computation, statistical analysis, and failure analysis.
+The notebook contains:
 
-The study can be executed in **Google Colab** or a compatible Jupyter environment.
+* experimental configuration
+* agent-harness implementation
+* execution procedure
+* evaluation logic
+* metric computation
+* statistical analysis
+* failure classification
+* result generation
+
+The experiment can be executed in **Google Colab** or a compatible Jupyter environment.
 
 ---
 
@@ -131,25 +208,16 @@ The study can be executed in **Google Colab** or a compatible Jupyter environmen
 NOOA-Ablation-Study/
 │
 ├── images/
+│   └── Study visualizations and figures
 │
 ├── results/
+│   └── Experimental outputs and analysis results
 │
 ├── nooa_ablation_study.ipynb
+│   └── Complete experimental implementation and analysis
 │
 └── README.md
 ```
-
-### `images/`
-
-Contains visualizations and figures generated for the study.
-
-### `results/`
-
-Contains the experimental outputs and analysis results.
-
-### `nooa_ablation_study.ipynb`
-
-The primary research artifact containing the complete experimental implementation and analysis.
 
 ---
 
@@ -166,37 +234,35 @@ Where applicable, the following are kept consistent across configurations:
 * execution constraints
 * experimental protocol
 
-This controlled setup reduces confounding factors when comparing configurations.
+This reduces confounding factors when comparing the different harness configurations.
 
 ---
 
-## Key Design Principle
+## Core Principle
 
-The central premise of NOOA is simple:
+NOOA is built around a simple systems principle:
 
-> **Agent architecture should be evaluated component by component, not only as a complete system.**
+> **Isolate → Execute → Measure → Analyze → Attribute**
 
-A sophisticated agent harness may contain many useful mechanisms, but complexity alone does not establish that each mechanism provides value.
+An agent harness can contain many sophisticated mechanisms, but architectural complexity alone does not demonstrate value.
 
-A component should ideally demonstrate one or more of the following:
+A component should justify its inclusion through measurable improvements such as:
 
 1. improved reliability,
 2. reduced failure frequency,
 3. improved execution efficiency,
 4. improved recovery behavior, or
-5. meaningful observability.
+5. improved observability.
 
-The ablation methodology provides a way to measure these effects independently.
+At the same time, any additional latency, memory use, serialization, orchestration complexity, or failure surface should be considered part of the trade-off.
 
 ---
 
 ## Limitations
 
-The results should be interpreted within the scope of the experimental environment.
-
 ### Controlled Task Environment
 
-The experiments use controlled tasks and therefore may not fully represent the complexity of production agent workloads.
+The experiments use controlled tasks and may not fully represent the complexity of production agent workloads.
 
 ### Model Behavior
 
@@ -204,7 +270,7 @@ The experimental setup includes controlled or simulated model behavior. Results 
 
 ### CodeAct Environment
 
-The CodeAct component is evaluated within the study's controlled execution environment and does not capture every property of a production-grade sandbox.
+CodeAct is evaluated within the study's controlled execution environment and does not capture every characteristic of a production-grade sandbox.
 
 ### Generalization
 
@@ -212,37 +278,58 @@ Results are specific to the evaluated configurations, tasks, and implementation.
 
 ### Component Interactions
 
-Individual ablations do not completely characterize all higher-order interactions between every possible combination of harness components.
+The evaluated ablations do not completely characterize every higher-order interaction between all possible combinations of harness components.
 
 ---
 
-## Why This Matters
+## Why This Study Matters
 
-As agentic systems become more complex, it becomes increasingly easy to add another layer of memory, validation, orchestration, context management, or recovery without knowing whether that layer meaningfully improves the system.
+Agent systems are increasingly becoming software systems with multiple interacting layers of orchestration, state, context, validation, tool execution, and recovery.
 
-NOOA takes a systems-oriented approach:
+That creates a growing engineering problem:
 
-**Isolate → Execute → Measure → Analyze → Attribute**
+**More components do not automatically mean a better agent.**
 
-The objective is not to claim that one agent architecture is universally optimal.
+NOOA provides a controlled methodology for investigating that assumption.
 
-The objective is to establish a more rigorous way to reason about **which engineering mechanisms actually contribute to agent reliability and performance**.
+The goal is not to claim that one agent architecture is universally optimal.
+
+The goal is to make agent-harness design **measurable, comparable, and explainable**.
+
+---
+
+## Research Context
+
+NOOA forms part of my broader work in **AI systems engineering**, spanning:
+
+* agentic AI
+* LLM systems
+* RAG architectures
+* agent evaluation
+* inference optimization
+* deep learning performance profiling
+* reliability engineering
+* systems-level AI optimization
+
+The NVIDIA-oriented performance work and this agent-harness study share the same engineering philosophy:
+
+> **Understand the system at the component level, identify the bottleneck or contribution, and validate the claim experimentally.**
 
 ---
 
 ## Research Artifact
 
-This repository contains the complete experimental artifact for the NOOA ablation study, including:
+This repository contains the complete NOOA experimental artifact:
 
-* experimental implementation
 * ablation configurations
-* evaluation logic
-* generated results
+* experimental implementation
+* evaluation methodology
 * statistical analysis
 * failure analysis
-* visualizations
+* generated results
+* study visualizations
 
-The notebook and accompanying outputs are intended to make the experimental process transparent and reproducible.
+The notebook serves as the primary executable research artifact, while `results/` and `images/` contain the corresponding outputs and visual evidence.
 
 ---
 
